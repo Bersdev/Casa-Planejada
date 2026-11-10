@@ -80,7 +80,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     setThemeState((localStorage.getItem("cp-theme") as Theme) ?? "system");
     const code = new URLSearchParams(location.search).get("convite");
-    if (code) localStorage.setItem("cp-invite", code);
+    if (code) {
+      // Guarda o convite e limpa o endereço, para não pedir de novo a cada recarga
+      localStorage.setItem("cp-invite", code);
+      history.replaceState(null, "", location.pathname);
+    }
     supabase.auth.getSession().then(({ data }) => { setSession(data.session); if (!data.session) setReady(true); });
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
       // Ao trocar de usuário, volta para "carregando" até as casas dele chegarem
