@@ -292,3 +292,55 @@ create policy receipts_insert on storage.objects for insert to authenticated
   with check (bucket_id = 'receipts' and public.is_member(((storage.foldername(name))[1])::uuid));
 create policy receipts_delete on storage.objects for delete to authenticated
   using (bucket_id = 'receipts' and public.is_member(((storage.foldername(name))[1])::uuid));
+
+-- Referências entre tabelas só valem dentro da mesma casa (chaves compostas com household_id)
+alter table bills add constraint bills_id_house_key unique (id, household_id);
+alter table incomes add constraint incomes_id_house_key unique (id, household_id);
+alter table cards add constraint cards_id_house_key unique (id, household_id);
+alter table works add constraint works_id_house_key unique (id, household_id);
+alter table reserves add constraint reserves_id_house_key unique (id, household_id);
+alter table categories add constraint categories_id_house_key unique (id, household_id);
+
+alter table bill_months drop constraint bill_months_bill_id_fkey,
+  add constraint bill_months_bill_fk foreign key (bill_id, household_id) references bills (id, household_id) on delete cascade;
+alter table income_months drop constraint income_months_income_id_fkey,
+  add constraint income_months_income_fk foreign key (income_id, household_id) references incomes (id, household_id) on delete cascade;
+alter table card_invoices drop constraint card_invoices_card_id_fkey,
+  add constraint card_invoices_card_fk foreign key (card_id, household_id) references cards (id, household_id) on delete cascade;
+alter table work_installments drop constraint work_installments_work_id_fkey,
+  add constraint work_installments_work_fk foreign key (work_id, household_id) references works (id, household_id) on delete cascade;
+alter table reserve_moves drop constraint reserve_moves_reserve_id_fkey,
+  add constraint reserve_moves_reserve_fk foreign key (reserve_id, household_id) references reserves (id, household_id) on delete cascade;
+alter table reserve_moves drop constraint reserve_moves_bill_id_fkey,
+  add constraint reserve_moves_bill_fk foreign key (bill_id, household_id) references bills (id, household_id) on delete set null (bill_id);
+alter table expenses drop constraint expenses_card_id_fkey,
+  add constraint expenses_card_fk foreign key (card_id, household_id) references cards (id, household_id) on delete set null (card_id);
+alter table expenses drop constraint expenses_category_id_fkey,
+  add constraint expenses_category_fk foreign key (category_id, household_id) references categories (id, household_id) on delete set null (category_id);
+alter table bills drop constraint bills_category_id_fkey,
+  add constraint bills_category_fk foreign key (category_id, household_id) references categories (id, household_id) on delete set null (category_id);
+alter table bills drop constraint bills_reserve_id_fkey,
+  add constraint bills_reserve_fk foreign key (reserve_id, household_id) references reserves (id, household_id) on delete set null (reserve_id);
+
+-- Limite diário de leituras de nota por pessoa (protege a cota grátis da Groq)
+create table receipt_usage (
+  user_id uuid not null references auth.users(id) on delete cascade,
+  day date not null,
+  count int not null default 0,
+  primary key (user_id, day)
+);
+alter table receipt_usage enable row level security;
+revoke all on receipt_usage from anon, authenticated;
+
+create function use_receipt_quota() returns boolean
+language plpgsql security definer set search_path = public as $$
+declare n int;
+begin
+  if auth.uid() is null or not exists (select 1 from members where user_id = auth.uid()) then return false; end if;
+  insert into receipt_usage (user_id, day, count) values (auth.uid(), (now() at time zone 'America/Sao_Paulo')::date, 1)
+    on conflict (user_id, day) do update set count = receipt_usage.count + 1
+    returning count into n;
+  return n <= 60;
+end $$;
+revoke execute on function use_receipt_quota() from public, anon;
+grant execute on function use_receipt_quota() to authenticated;

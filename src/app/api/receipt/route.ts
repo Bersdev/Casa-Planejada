@@ -8,11 +8,16 @@ const fail = (error: string, status: number) => NextResponse.json({ error }, { s
 export async function POST(req: Request) {
   const token = req.headers.get("authorization")?.replace("Bearer ", "");
   if (!token) return fail("Entre na sua conta.", 401);
-  const member = await supabaseAs(token).from("members").select("user_id").limit(1);
+  const db = supabaseAs(token);
+  const member = await db.from("members").select("user_id").limit(1);
   if (member.error || !member.data.length) return fail("Entre na sua conta.", 401);
 
   const key = process.env.GROQ_API_KEY;
   if (!key) return fail("A leitura de notas ainda não está configurada (falta a chave da Groq). Preencha à mão.", 503);
+
+  // Limite diário por pessoa, contado no banco (a pessoa não consegue zerar o contador)
+  const quota = await db.rpc("use_receipt_quota");
+  if (quota.error || quota.data !== true) return fail("Limite diário de leituras de nota atingido. Preencha à mão ou tente amanhã.", 429);
 
   const { image, categories, today } = (await req.json()) as { image?: string; categories?: string[]; today?: string };
   if (typeof image !== "string" || !image.startsWith("data:image/") || image.length > 4_000_000) return fail("Foto inválida ou grande demais.", 400);

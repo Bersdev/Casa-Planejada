@@ -85,7 +85,9 @@ function Login() {
 export function Onboarding({ inModal }: { inModal?: boolean }) {
   const { session, toast, refreshHouses, setHouseId, close, data } = useApp();
   const meta = session?.user.user_metadata ?? {};
-  const [mode, setMode] = useState<"new" | "join">(!inModal && typeof localStorage !== "undefined" && localStorage.getItem("cp-invite") ? "join" : "new");
+  const [mode, setMode] = useState<"new" | "join">(typeof localStorage !== "undefined" && localStorage.getItem("cp-invite") ? "join" : "new");
+  // Quem já tem casa e fecha a janela sem confirmar descarta o convite
+  useEffect(() => { if (inModal) localStorage.removeItem("cp-invite"); }, [inModal]);
   const me = data?.members.find((m) => m.user_id === session?.user.id)?.name;
   const [f, set] = useF({ name: me ?? ((meta.name ?? meta.full_name ?? "") as string).split(" ")[0], house: "", code: (typeof localStorage !== "undefined" && localStorage.getItem("cp-invite")) || "" });
   const [busy, setBusy] = useState(false);
@@ -110,6 +112,7 @@ export function Onboarding({ inModal }: { inModal?: boolean }) {
       {mode === "new"
         ? <Field label="Nome da casa"><input className="inp" required placeholder="Casa da mãe" value={f.house} onChange={(e) => set({ house: e.target.value })} /></Field>
         : <Field label="Código do convite"><input className="inp uppercase" required value={f.code} onChange={(e) => set({ code: e.target.value })} /></Field>}
+      {mode === "join" && inModal && <p className="text-xs text-mut">Só confirme se o convite veio de alguém da sua família. Você passa a ver e editar os dados dessa casa.</p>}
       <button disabled={busy} className="btn btn-pri w-full">{mode === "new" ? "Criar casa" : "Entrar na casa"}</button>
     </form>
   );
@@ -218,6 +221,9 @@ export default function Shell({ children }: { children: ReactNode }) {
   const path = usePathname();
 
   useEffect(() => { navigator.serviceWorker?.register("/sw.js").catch(() => {}); }, []);
+  // Link de convite aberto por quem já tem casa: pede confirmação em vez de entrar direto
+  const loaded = !!data;
+  useEffect(() => { if (loaded && localStorage.getItem("cp-invite")) open(<Onboarding inModal />); }, [loaded, open]);
 
   if (!ready) return <main className="grid min-h-dvh place-items-center"><img src="/icons/app-192.png" alt="Carregando" className="h-14 w-14 animate-pulse rounded-2xl" /></main>;
   if (!session) return <Login />;

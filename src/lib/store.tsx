@@ -94,15 +94,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const refreshHouses = useCallback(async () => {
     if (!userId) return;
-    const load = () => supabase.from("members").select("name, households(id, name)").eq("user_id", userId);
-    let { data: rows, error } = await load();
-    const code = localStorage.getItem("cp-invite");
-    if (!error && rows?.length && code) {
-      const j = await supabase.rpc("join_household", { p_code: code, p_member_name: rows[0].name });
-      localStorage.removeItem("cp-invite");
-      if (j.error) toast(j.error.message);
-      else ({ data: rows, error } = await load());
-    }
+    // Um link de convite nunca entra sozinho numa casa: a tela pede confirmação (ver Shell)
+    const { data: rows, error } = await supabase.from("members").select("name, households(id, name)").eq("user_id", userId);
     if (error) { toast(error.message); setReady(true); return; }
     const list = (rows ?? []).map((r) => r.households as unknown as { id: string; name: string }).filter(Boolean);
     setHouses(list);
