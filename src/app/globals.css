@@ -1,0 +1,45 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --bg: #f1f2f5; --card: #ffffff; --ink: #0f172a; --mut: #6b7280; --line: #eceef2; --soft: #f4f5f7;
+  --pri: #2563eb; --navy: #1e3a8a; --ok: #16a34a; --bad: #e11d48; --warn: #d97706;
+}
+.dark {
+  --bg: #0b0f17; --card: #141922; --ink: #e7eaf0; --mut: #8b94a5; --line: #232a37; --soft: #1b212c;
+  --pri: #3b82f6; --navy: #6366f1; --ok: #22c55e; --bad: #fb7185; --warn: #fbbf24;
+}
+@theme inline {
+  --color-bg: var(--bg); --color-card: var(--card); --color-ink: var(--ink); --color-mut: var(--mut);
+  --color-line: var(--line); --color-soft: var(--soft); --color-pri: var(--pri); --color-navy: var(--navy);
+  --color-ok: var(--ok); --color-bad: var(--bad); --color-warn: var(--warn);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+html { background: var(--bg); color: var(--ink); -webkit-tap-highlight-color: transparent; }
+body { min-height: 100dvh; font-feature-settings: "tnum", "cv11"; }
+button, a, label { cursor: pointer; }
+@layer components {
+.card { background: var(--card); border-radius: 18px; box-shadow: 0 1px 2px rgb(15 23 42 / 0.04); }
+.inp {
+  width: 100%; height: 44px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--line);
+  background: var(--card); color: var(--ink); font-size: 16px; outline: none;
+}
+.inp:focus { border-color: var(--pri); box-shadow: 0 0 0 3px color-mix(in srgb, var(--pri) 18%, transparent); }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 40px; padding: 0 14px;
+  border-radius: 12px; font-size: 14px; font-weight: 600; border: 1px solid var(--line); background: var(--card); color: var(--ink);
+  white-space: nowrap; transition: filter 0.15s, background 0.15s;
+}
+.btn:hover { background: var(--soft); }
+.btn:disabled { opacity: 0.5; cursor: default; }
+.btn-pri { background: var(--pri); border-color: var(--pri); color: #fff; }
+.btn-pri:hover { background: var(--pri); filter: brightness(1.08); }
+.btn-bad { color: var(--bad); }
+.btn-sm { height: 32px; padding: 0 10px; font-size: 13px; border-radius: 10px; }
+.row { display: flex; align-items: center; gap: 10px; padding: 11px 0; border-top: 1px solid var(--line); font-size: 14px; }
+.row:first-child { border-top: 0; }
+}
+.no-bar::-webkit-scrollbar { display: none; }
+.no-bar { scrollbar-width: none; }
+.safe-b { padding-bottom: env(safe-area-inset-bottom); }
+.safe-t { padding-top: env(safe-area-inset-top); }

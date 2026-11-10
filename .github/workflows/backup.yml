@@ -1,0 +1,23 @@
+name: Backup mensal
+on:
+  schedule:
+    - cron: "0 6 1 * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Baixar dados
+        run: |
+          mkdir -p backups
+          curl -fsS "${{ secrets.APP_URL }}/api/export" -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" -o "backups/$(date +%Y-%m).json"
+      - name: Salvar no repositório
+        run: |
+          git config user.name "backup-bot"
+          git config user.email "backup-bot@users.noreply.github.com"
+          git add backups
+          git commit -m "Backup $(date +%Y-%m)" || echo "sem mudanças"
+          git push
