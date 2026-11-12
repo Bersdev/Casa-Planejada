@@ -82,6 +82,7 @@ function Login() {
           <button disabled={busy} className="btn btn-pri w-full">{mode === "in" ? "Entrar" : "Criar conta"}</button>
         </form>
         <Link href="/privacidade" className="mt-4 block text-center text-xs text-mut underline">Política de Privacidade</Link>
+        <Link href="/termos" className="mt-1 block text-center text-xs text-mut underline">Termos de Serviço</Link>
         <button onClick={() => setMode(mode === "in" ? "up" : "in")} className="mt-3 w-full text-center text-sm font-medium text-pri">
           {mode === "in" ? "Ainda não tenho conta" : "Já tenho conta"}
         </button>
@@ -233,7 +234,7 @@ export default function Shell({ children }: { children: ReactNode }) {
   const loaded = !!data;
   useEffect(() => { if (loaded && localStorage.getItem("cp-invite")) open(<Onboarding inModal />); }, [loaded, open]);
 
-  if (path === "/privacidade") return <>{children}</>;
+  if (path === "/privacidade" || path === "/termos") return <>{children}</>;
   if (!ready) return <main className="grid min-h-dvh place-items-center"><img src="/icons/app-192.png" alt="Carregando" className="h-14 w-14 animate-pulse rounded-2xl" /></main>;
   if (!session) return <Login />;
   if (!houses.length) return <Onboarding />;
