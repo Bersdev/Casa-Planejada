@@ -10,6 +10,7 @@ export const metadata: Metadata = {
   title: "Casa Planejada",
   description: "Planejamento financeiro da casa: rendas, contas, cartões, obras e reservas.",
   manifest: "/manifest.webmanifest",
+  verification: { google: "VvN-f8jaMYTS0b4NSsvXIzlLOCt73NlLbJsK5r0fG88" },
   appleWebApp: { capable: true, title: "Casa Planejada", statusBarStyle: "default" },
   icons: { icon: "/icons/app-192.png", apple: "/icons/apple-touch-icon.png" },
 };
