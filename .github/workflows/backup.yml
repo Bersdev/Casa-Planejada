@@ -10,10 +10,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Baixar dados
+      - name: Baixar dados e cifrar
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
         run: |
+          set -euo pipefail
+          test -n "$BACKUP_PASSPHRASE" || { echo "Falta o segredo BACKUP_PASSPHRASE"; exit 1; }
           mkdir -p backups
-          curl -fsS "${{ secrets.APP_URL }}/api/export" -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" -o "backups/$(date +%Y-%m).json"
+          curl -fsS "$APP_URL/api/export" -H "Authorization: Bearer $CRON_SECRET"             | openssl enc -aes-256-cbc -pbkdf2 -iter 600000 -salt -pass env:BACKUP_PASSPHRASE -out "backups/$(date +%Y-%m).json.enc"
       - name: Salvar no repositório
         run: |
           git config user.name "backup-bot"

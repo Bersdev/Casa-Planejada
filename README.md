@@ -33,7 +33,7 @@ Testes do motor de cálculo: `npm test`. Teste das rotas protegidas com o servid
 ## Tarefas automáticas
 
 - **Avisos de vencimento**: a Vercel chama `/api/cron` todo dia às 9h de Brasília (`vercel.json`). A mesma chamada mantém o banco do Supabase ativo.
-- **Backup mensal**: o GitHub Actions (`.github/workflows/backup.yml`) baixa `/api/export` no dia 1 e salva em `backups/`. Precisa dos segredos `APP_URL` e `CRON_SECRET` no repositório.
+- **Backup mensal**: o GitHub Actions (`.github/workflows/backup.yml`) baixa `/api/export` no dia 1 e salva em `backups/` **cifrado** (`.json.enc`, AES-256), para que quem tiver acesso ao repositório não leia os dados financeiros. Precisa dos segredos `APP_URL`, `CRON_SECRET` e `BACKUP_PASSPHRASE` (uma frase longa só sua; guarde-a num gerenciador de senhas). Para abrir: `openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 -in backups/AAAA-MM.json.enc -out backup.json`.
 
 ## Onde fica cada coisa
 
@@ -41,3 +41,8 @@ Testes do motor de cálculo: `npm test`. Teste das rotas protegidas com o servid
 - `src/lib/store.tsx`: estado do app e carga dos dados da casa.
 - `src/components/forms.tsx`: formulários (gasto com leitura de nota, contas, rendas, cartões, obras, reservas).
 - `src/app/*/page.tsx`: uma pasta por tela.
+
+## Segurança
+
+- Repositório privado; dê acesso só em Settings → Collaborators. Nunca coloque chaves no código: elas ficam em `.env.local` e nos segredos da Vercel/GitHub.
+- `supabase/migrations/` guarda os ajustes de segurança do banco; aplique-os no SQL Editor do Supabase.

@@ -125,7 +125,7 @@ export default function Casa() {
                 <button onClick={share} className="btn btn-sm btn-pri flex-1"><Share2 size={14} />Enviar</button>
                 <button onClick={async () => { await navigator.clipboard.writeText(link); toast("Link copiado."); }} className="btn btn-sm flex-1"><Copy size={14} />Copiar</button>
               </div>
-              <p className="text-[11px] text-mut">O convite vale por 7 dias. Quem abrir o link cria a conta e entra nesta casa.</p>
+              <p className="text-[11px] text-mut">O convite vale por 7 dias e só pode ser usado uma vez. Quem abrir o link cria a conta e entra nesta casa.</p>
             </div>
           ) : <button onClick={invite} className="btn mt-3 w-full"><Plus size={16} />Convidar alguém da família</button>}
         </Card>

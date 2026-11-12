@@ -344,3 +344,5 @@ begin
 end $$;
 revoke execute on function use_receipt_quota() from public, anon;
 grant execute on function use_receipt_quota() to authenticated;
+
+-- Endurecimento (ver supabase/migrations/2026-11-12-hardening.sql): grants por coluna, convite de 12 caracteres e uso único, limite do bucket
