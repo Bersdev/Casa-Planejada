@@ -35,6 +35,9 @@ function Brand() {
   );
 }
 
+// O botão do Google só aparece depois que o login Google é ativado no Supabase (NEXT_PUBLIC_GOOGLE_LOGIN=true)
+const GOOGLE_LOGIN = process.env.NEXT_PUBLIC_GOOGLE_LOGIN === "true";
+
 function Login() {
   const { toast } = useApp();
   const [mode, setMode] = useState<"in" | "up">("in");
@@ -63,11 +66,15 @@ function Login() {
         <Brand />
         <h1 className="mt-6 text-xl font-bold">{mode === "in" ? "Entrar" : "Criar conta"}</h1>
         <p className="mb-5 text-sm text-mut">Organize as rendas e os gastos da casa em um só lugar.</p>
-        <button onClick={google} className="btn w-full">
-          <svg width="16" height="16" viewBox="0 0 48 48" aria-hidden><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.2C12.400 13.700 17.700 9.500 24 9.500z" /><path fill="#4285F4" d="M46.500 24.500c0-1.600-.100-3.100-.400-4.500H24v9h12.700c-.600 3-2.200 5.500-4.700 7.200l7.600 5.900c4.400-4.100 6.900-10.100 6.900-17.600z" /><path fill="#FBBC05" d="M10.500 28.600c-.500-1.500-.800-3-.800-4.600s.300-3.100.800-4.600l-7.900-6.200C.900 16.500 0 20.100 0 24s.900 7.500 2.600 10.800l7.900-6.200z" /><path fill="#34A853" d="M24 48c6.500 0 11.900-2.100 15.900-5.800l-7.600-5.900c-2.100 1.400-4.900 2.300-8.300 2.300-6.300 0-11.600-4.200-13.500-9.900l-7.900 6.200C6.500 42.600 14.600 48 24 48z" /></svg>
-          Entrar com Google
-        </button>
-        <div className="my-4 flex items-center gap-3 text-xs text-mut"><span className="h-px flex-1 bg-line" />ou<span className="h-px flex-1 bg-line" /></div>
+        {GOOGLE_LOGIN && (
+          <>
+          <button onClick={google} className="btn w-full">
+            <svg width="16" height="16" viewBox="0 0 48 48" aria-hidden><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.2C12.400 13.700 17.700 9.500 24 9.500z" /><path fill="#4285F4" d="M46.500 24.500c0-1.600-.100-3.100-.400-4.500H24v9h12.700c-.600 3-2.200 5.500-4.700 7.200l7.600 5.900c4.400-4.100 6.900-10.100 6.900-17.600z" /><path fill="#FBBC05" d="M10.500 28.600c-.500-1.500-.800-3-.800-4.600s.300-3.100.800-4.600l-7.900-6.200C.900 16.500 0 20.100 0 24s.900 7.500 2.600 10.800l7.900-6.200z" /><path fill="#34A853" d="M24 48c6.500 0 11.900-2.100 15.900-5.800l-7.600-5.900c-2.100 1.400-4.900 2.300-8.300 2.300-6.300 0-11.600-4.200-13.500-9.900l-7.900 6.200C6.500 42.600 14.600 48 24 48z" /></svg>
+            Entrar com Google
+          </button>
+          <div className="my-4 flex items-center gap-3 text-xs text-mut"><span className="h-px flex-1 bg-line" />ou<span className="h-px flex-1 bg-line" /></div>
+          </>
+        )}
         <form onSubmit={submit} className="space-y-3">
           {mode === "up" && <Field label="Seu nome"><input className="inp" required value={f.name} onChange={(e) => set({ name: e.target.value })} autoComplete="name" /></Field>}
           <Field label="E-mail"><input className="inp" type="email" required value={f.email} onChange={(e) => set({ email: e.target.value })} autoComplete="email" /></Field>
