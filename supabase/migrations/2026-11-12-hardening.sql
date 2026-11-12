@@ -34,3 +34,5 @@ end $$;
 -- Fotos de nota: só imagens de até 5 MB
 update storage.buckets set file_size_limit = 5242880,
   allowed_mime_types = array['image/jpeg','image/png','image/webp','image/heic','image/heif'] where id = 'receipts';
+
+revoke truncate, references, trigger on all tables in schema public from anon, authenticated;
