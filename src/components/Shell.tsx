@@ -35,8 +35,8 @@ function Brand() {
   );
 }
 
-// O botão do Google só aparece depois que o login Google é ativado no Supabase (NEXT_PUBLIC_GOOGLE_LOGIN=true)
-const GOOGLE_LOGIN = process.env.NEXT_PUBLIC_GOOGLE_LOGIN === "true";
+// O login Google está ativo no Supabase; para esconder o botão, defina NEXT_PUBLIC_GOOGLE_LOGIN=false
+const GOOGLE_LOGIN = process.env.NEXT_PUBLIC_GOOGLE_LOGIN !== "false";
 
 function Login() {
   const { toast } = useApp();
